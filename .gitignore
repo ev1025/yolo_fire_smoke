@@ -7,3 +7,9 @@ __pycache__/
 .venv/
 runs/
 *.log
+
+# 학습 외 (로컬 유지, GitHub 제외)
+run_overnight.ps1
+setup_env.ps1
+start_api.bat
+api/
