@@ -5,8 +5,8 @@ YOLOv8m `best.pt` 추론 서버. 이미지·영상 탐지 + 박스/경보 JSON +
 ## 실행
 ```bash
 # 의존성은 requirements.txt 에 포함 (fastapi, uvicorn, python-multipart)
-# 가중치 자동 인식: work/runs/yolov8m_fire_smoke/weights/best.pt
-#   (또는 환경변수 MRO_WEIGHTS=<경로> 로 지정)
+# 가중치 자동 인식: work/runs/yolov8m/weights/best.pt
+#   (또는 환경변수 WEIGHTS=<경로> 로 지정)
 cd api
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```

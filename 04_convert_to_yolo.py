@@ -82,7 +82,7 @@ def main():
     print(f"\n[완료] 변환 {ok:,}장, 박스 {boxes:,}개, 누락 {miss:,}장")
     if miss:
         print("  누락 많으면 03 추출 부족 또는 prefix 불일치 -> archive_prefix.txt 확인")
-    print(f"dataset: {C.DATASET} -> 다음: python 05_train.py")
+    print(f"dataset: {C.DATASET} -> 다음: python model.py train --models yolov8m")
 
 
 if __name__ == "__main__":

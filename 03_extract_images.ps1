@@ -11,7 +11,7 @@
 $ErrorActionPreference = "Stop"
 
 $WORK      = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "work"
-$ZIP       = "D:\엠아르오_학습데이터\01.원천데이터\TS.zip"
+$ZIP       = "D:\화재연기_원천데이터\01.원천데이터\TS.zip"
 $LIST      = Join-Path $WORK "extract_list.txt"
 $STAGING   = Join-Path $WORK "staging"
 $PREFIXOUT = Join-Path $WORK "archive_prefix.txt"

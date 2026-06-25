@@ -8,7 +8,7 @@
 - POST /detect      이미지 1장 -> 박스+경보 JSON (+주석 이미지)
 - POST /detect/video 영상 -> 프레임 샘플링 탐지 -> 요약+프레임별 JSON
 
-가중치 경로 우선순위: 환경변수 MRO_WEIGHTS > work/runs/.../best.pt > yolov8m.pt
+가중치 경로 우선순위: 환경변수 WEIGHTS > work/runs/.../best.pt > yolov8m.pt
 실행: api/ 에서  uvicorn app:app --host 0.0.0.0 --port 8000
 """
 import os
@@ -22,10 +22,10 @@ ROOT = Path(__file__).resolve().parent
 
 def _resolve_weights():
     cands = []
-    if os.environ.get("MRO_WEIGHTS"):
-        cands.append(Path(os.environ["MRO_WEIGHTS"]))
+    if os.environ.get("WEIGHTS"):
+        cands.append(Path(os.environ["WEIGHTS"]))
     cands += [
-        ROOT.parent / "work" / "runs" / "yolov8m_fire_smoke" / "weights" / "best.pt",
+        ROOT.parent / "work" / "runs" / "yolov8m" / "weights" / "best.pt",
         ROOT.parent / "yolov8m.pt",   # best.pt 회수 전 구조 테스트용 폴백
     ]
     for c in cands:
@@ -34,9 +34,9 @@ def _resolve_weights():
     return None
 
 
-app = FastAPI(title="MRO 화재/연기 탐지 API", version="1.0")
+app = FastAPI(title="화재/연기 탐지 API", version="1.0")
 WEIGHTS = _resolve_weights()
-IMGSZ = int(os.environ.get("MRO_IMGSZ", "1280"))  # 학습값과 일치(1280). 4060에서 960과 속도 차이 거의 없음
+IMGSZ = int(os.environ.get("IMGSZ", "1280"))  # 학습값과 일치(1280)
 detector = FireSmokeDetector(WEIGHTS, imgsz=IMGSZ) if WEIGHTS else None
 
 
