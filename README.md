@@ -178,7 +178,7 @@ onnx는 fp32라 .pt의 약 2배 (fp16 변환 시 절반)
 
 ## 6. 하이퍼파라미터 튜닝 (HPO)
 
-CPU 배포 후보 **YOLOv8s·YOLOv8n** 대상. Optuna proxy 튜닝 → 채택값으로 본학습 1회.
+CPU 배포 후보 **YOLOv8s·YOLOv8n** + baseline **YOLOv8m**(MuSGD vs SGD 공정 비교용) 대상. Optuna proxy 튜닝 → 채택값으로 본학습 1회.
 
 ### 6.1 방식
 - 도구: **Optuna** (TPESampler + MedianPruner), 모델별 study 분리(8s/8n 동시 탐색)
@@ -204,26 +204,29 @@ CPU 배포 후보 **YOLOv8s·YOLOv8n** 대상. Optuna proxy 튜닝 → 채택값
 - **lr0/lrf만 0.01로 오버라이드** (HPO값 ~0.0008 미사용): proxy(30ep)가 lr을 낮게 편향시켜 100ep 본학습엔 부적합
 - box/cls/dfl/증강은 전이성이 좋아 HPO값 그대로 채택
 
-| 파라미터 | YOLOv8s | YOLOv8n | 출처 |
-|---|---|---|---|
-| box | 10.26 | 11.06 | HPO |
-| cls | 0.78 | 0.72 | HPO |
-| dfl | 1.74 | 1.71 | HPO |
-| mixup | 0.195 | 0.086 | HPO |
-| optimizer | SGD | SGD | HPO |
-| **lr0 / lrf** | **0.01 / 0.01** | **0.01 / 0.01** | **오버라이드** |
+| 파라미터 | YOLOv8s | YOLOv8n | YOLOv8m | 출처 |
+|---|---|---|---|---|
+| box | 10.26 | 11.06 | 11.06 | HPO |
+| cls | 0.78 | 0.72 | 0.72 | HPO |
+| dfl | 1.74 | 1.71 | 1.71 | HPO |
+| mixup | 0.195 | 0.086 | 0.086 | HPO |
+| optimizer | SGD | SGD | SGD | HPO |
+| **lr0 / lrf** | **0.01 / 0.01** | **0.01 / 0.01** | **0.01 / 0.01** | **오버라이드** |
 
 
 
-### 6.4 본학습 결과 (SGD 고정, 진행 중)
+### 6.4 본학습 결과 (SGD 고정)
 
-- **baseline은 `auto`(MuSGD), 튜닝 재학습은 `SGD` 고정** → 공정 비교 위해 옵티마이저 통일 권장.
+- **baseline은 `auto`(MuSGD), 튜닝 재학습은 `SGD` 고정** → 옵티마이저 통일 비교.
 - 설정: 1280px, 전체데이터, 100 epoch, patience=30, cos_lr, batch=32.
-- 완료 후 ONNX 변환 → baseline 대비 최종 확정 → 백엔드 가중치 교체.
 
 | 모델 | 옵티마이저 | mAP50-95 | baseline 대비 |
 |---|---|---|---|
-| YOLOv8s 튜닝 | SGD | ~0.629 (ep80/100) | baseline 0.622 **초과** |
-| YOLOv8n 튜닝 | SGD | ~0.610 (ep90/100) | baseline 0.612 근접 |
+| YOLOv8s 튜닝 | SGD | 0.629 (ep99) | baseline 0.622 **초과** |
+| YOLOv8n 튜닝 | SGD | 0.610 (ep90) | baseline 0.612 동일 |
+| YOLOv8m 튜닝 | SGD | 0.631 (ep91, best 61) | baseline 0.638 **미달** |
+
+**결론**: SGD 재튜닝이 MuSGD baseline을 확실히 넘지 못함(8s만 자기 baseline 소폭 초과, 8n·8m은 동일~미달). **MuSGD(`auto`) baseline이 이미 강한 선택**이었음 → 배포본은 baseline(MuSGD) 유지.
+- 클래스별(튜닝 8m): 불꽃 0.684 / 연기 0.577 → **연기 박스 정밀도가 천장**(연기는 비정형이라 엄격 IoU 정합 한계).
 
 
